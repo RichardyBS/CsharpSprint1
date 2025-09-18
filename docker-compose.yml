@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  # PostgreSQL para Analytics Service
+  postgres:
+    image: postgres:15
+    container_name: ${DOCKER_CONTAINER_PREFIX}_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ${DOCKER_NETWORK}
+
+  # MongoDB para Billing Service
+  mongodb:
+    image: mongo:7.0
+    container_name: ${DOCKER_CONTAINER_PREFIX}_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ${DOCKER_NETWORK}
+
+  # Redis para Notification Service
+  redis:
+    image: redis:7.2-alpine
+    container_name: ${DOCKER_CONTAINER_PREFIX}_redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ${DOCKER_NETWORK}
+
+  # RabbitMQ para Event Bus
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: ${DOCKER_CONTAINER_PREFIX}_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ${DOCKER_NETWORK}
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./src/Services/Analytics.Service
+      dockerfile: Dockerfile
+    container_name: ${DOCKER_CONTAINER_PREFIX}_analytics
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DATABASE};Username=${POSTGRES_USERNAME};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - JwtSettings__SecretKey=${ANALYTICS_SECRET_KEY}
+    ports:
+      - "${ANALYTICS_SERVICE_PORT}:80"
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - ${DOCKER_NETWORK}
+    env_file:
+      - .env
+
+  # Billing Service
+  billing-service:
+    build:
+      context: ./src/Services/Billing.Service
+      dockerfile: Dockerfile
+    container_name: ${DOCKER_CONTAINER_PREFIX}_billing
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__MongoDB=mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/${MONGODB_DATABASE}?authSource=admin
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+    ports:
+      - "${BILLING_SERVICE_PORT}:80"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ${DOCKER_NETWORK}
+    env_file:
+      - .env
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./src/Services/Notification.Service
+      dockerfile: Dockerfile
+    container_name: ${DOCKER_CONTAINER_PREFIX}_notification
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__Redis=redis:${REDIS_PORT}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - Email__SmtpHost=${SMTP_HOST}
+      - Email__SmtpPort=${SMTP_PORT}
+      - Email__Username=${SMTP_USERNAME}
+      - Email__Password=${SMTP_PASSWORD}
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:80"
+    depends_on:
+      - redis
+      - rabbitmq
+    networks:
+      - ${DOCKER_NETWORK}
+    env_file:
+      - .env
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./src/ApiGateway
+      dockerfile: Dockerfile
+    container_name: ${DOCKER_CONTAINER_PREFIX}_gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - Services__Analytics=http://analytics-service:80
+      - Services__Billing=http://billing-service:80
+      - Services__Notification=http://notification-service:80
+      - JwtSettings__SecretKey=${API_GATEWAY_SECRET_KEY}
+    ports:
+      - "${API_GATEWAY_PORT}:80"
+    depends_on:
+      - analytics-service
+      - billing-service
+      - notification-service
+    networks:
+      - ${DOCKER_NETWORK}
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  estacionamento-network:
+    driver: bridge

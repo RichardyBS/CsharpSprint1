@@ -88,7 +88,7 @@ public class ControladorCobranca : ControllerBase
     }
 
     [HttpGet("relatorio-financeiro")]
-    public async Task<IActionResult> ObterRelatorioFinanceiro([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
+    public IActionResult ObterRelatorioFinanceiro([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
     {
         // Relatório financeiro - onde os números (não) batem
         // TODO: implementar agregações do MongoDB quando tiver tempo (spoiler: nunca vou ter)

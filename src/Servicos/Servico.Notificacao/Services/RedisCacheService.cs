@@ -188,7 +188,7 @@ public class RedisCacheService : IRedisCacheService
                 return false;
                 
             // Decrementar contador se estava como não lida
-            if (notificacao.Status == "Pendente")
+            if (notificacao.Status != "Lida")
             {
                 var contadorKey = $"cliente:{notificacao.ClienteId}:nao_lidas";
                 await _database.StringDecrementAsync(contadorKey);

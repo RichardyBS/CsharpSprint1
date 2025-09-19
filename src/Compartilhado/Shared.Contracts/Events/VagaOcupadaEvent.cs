@@ -5,9 +5,9 @@ namespace Shared.Contracts.Events;
 public record EventoVagaOcupada(
     Guid EventoId, // ID do evento
     DateTime OcorreuEm, // quando aconteceu
-    int VagaId, // qual vaga foi ocupada
+    Guid VagaId, // qual vaga foi ocupada
     string CodigoVaga, // código da vaga (tipo A1, B2, etc)
-    int ClienteId, // quem ocupou
+    Guid ClienteId, // quem ocupou
     string ClienteNome, // nome do cliente
     string ClienteCpf, // CPF do cliente
     DateTime DataEntrada // quando entrou

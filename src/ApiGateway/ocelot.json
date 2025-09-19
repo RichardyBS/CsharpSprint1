@@ -1,9 +1,6 @@
 {
-  // Configuração do Ocelot - o coração do gateway
-  // TODO: depois vou adicionar load balancing e circuit breaker
   "Rotas": [
     {
-      // Serviço de Análise - onde ficam os relatórios e dashboards
       "DownstreamPathTemplate": "/api/analise/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -19,7 +16,6 @@
       }
     },
     {
-      // Serviço de Cobrança - $$$$ é aqui que o dinheiro rola
       "DownstreamPathTemplate": "/api/cobranca/{everything}",
       "DownstreamScheme": "http", 
       "DownstreamHostAndPorts": [
@@ -35,7 +31,6 @@
       }
     },
     {
-      // Serviço de Notificação - spam... ops, comunicação importante!
       "DownstreamPathTemplate": "/api/notificacao/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -51,7 +46,6 @@
       }
     },
     {
-      // Autenticação - sem token não rola nada aqui
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -66,7 +60,6 @@
   ],
   "ConfiguracaoGlobal": {
     "UrlBase": "http://localhost:5000",
-    // Rate limiting pra não derrubar o servidor com spam
     "OpcoesLimiteRequisicoes": {
       "ListaBrancaClientes": [],
       "HabilitarLimiteRequisicoes": true,

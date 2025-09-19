@@ -144,8 +144,8 @@ public class FaturamentoService : IFaturamentoService
         var mes = DateTime.Now.Month;
         
         var ultimaFatura = await _context.Faturas
-            .Find(f => f.NumeroFatura.StartsWith($"{ano:0000}{mes:00}"))
-            .SortByDescending(f => f.NumeroFatura)
+            .Where(f => f.NumeroFatura.StartsWith($"{ano:0000}{mes:00}"))
+            .OrderByDescending(f => f.NumeroFatura)
             .FirstOrDefaultAsync();
 
         var proximoNumero = 1;

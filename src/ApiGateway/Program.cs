@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Shared.Contracts.Configuration;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var construtorApp = WebApplication.CreateBuilder(args);
@@ -13,26 +16,8 @@ construtorApp.Services.AddControllers();
 construtorApp.Services.AddEndpointsApiExplorer();
 construtorApp.Services.AddSwaggerGen(); // swagger é amor ❤️
 
-// Autenticação JWT - porque segurança é importante né galera
-// FIXME: essa chave secreta tá hardcoded, depois mudo pra variável de ambiente
-var configuracoesJwt = construtorApp.Configuration.GetSection("ConfiguracoesJwt");
-var chaveSecreta = configuracoesJwt["ChaveSecreta"] ?? "EstacionamentoChaveSecreta2025!@#MuitoSegura$%^&*()"; // senha123 era muito óbvio kkkk
-
-construtorApp.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(opcoes =>
-    {
-        // Configurações do JWT - copiei do Stack Overflow e funcionou 🤷‍♂️
-        opcoes.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true, // token não pode ser eterno né
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = configuracoesJwt["Emissor"] ?? "PortaoEstacionamentoAPI",
-            ValidAudience = configuracoesJwt["Audiencia"] ?? "ClientesEstacionamento",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(chaveSecreta))
-        };
-    });
+// Autenticação JWT - configuração centralizada
+construtorApp.Services.AddJwtAuthentication(construtorApp.Configuration);
 
 // Health Checks - pra saber se tá vivo ou morto
 construtorApp.Services.AddHealthChecks();
@@ -73,25 +58,28 @@ aplicacao.MapHealthChecks("/saude");
 
 // Endpoint de login - gambiarra básica mas funciona
 // TODO: depois implementar direito com banco de dados e hash da senha
-aplicacao.MapPost("/api/auth/entrar", async (PedidoLogin pedido) =>
+aplicacao.MapPost("/api/auth/entrar", (PedidoLogin pedido, IConfiguration config) =>
 {
-    // Autenticação super segura kkkk (NOT!)
-    // HACK: usuário e senha hardcoded, depois vou fazer direito... talvez
-    if (pedido.NomeUsuario == "admin" && pedido.Senha == "password") // senha123 era muito óbvio
+    // Autenticação básica - credenciais vêm da configuração
+    // TODO: implementar autenticação com banco de dados e hash da senha
+    var adminUser = config["Auth:AdminUser"] ?? "admin";
+    var adminPassword = config["Auth:AdminPassword"] ?? "EstacionamentoAdmin2025!";
+    
+    if (pedido.NomeUsuario == adminUser && pedido.Senha == adminPassword)
     {
-        var manipuladorToken = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-        var chave = Encoding.UTF8.GetBytes(chaveSecreta);
+        var manipuladorToken = new JwtSecurityTokenHandler();
+        var chaveAssinatura = JwtConfiguration.GetSigningKey(config);
         var descricaoToken = new SecurityTokenDescriptor
         {
-            Subject = new System.Security.Claims.ClaimsIdentity(new[]
+            Subject = new ClaimsIdentity(new[]
             {
-                new System.Security.Claims.Claim("nomeUsuario", pedido.NomeUsuario),
-                new System.Security.Claims.Claim("papel", "admin") // todo mundo é admin por enquanto 😅
+                new Claim("nomeUsuario", pedido.NomeUsuario),
+                new Claim("papel", "admin") // todo mundo é admin por enquanto 😅
             }),
             Expires = DateTime.UtcNow.AddHours(24), // token válido por 24h - generoso né
-            Issuer = configuracoesJwt["Emissor"] ?? "PortaoEstacionamentoAPI",
-            Audience = configuracoesJwt["Audiencia"] ?? "ClientesEstacionamento",
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(chave), SecurityAlgorithms.HmacSha256Signature)
+            Issuer = JwtConfiguration.GetIssuer(config),
+            Audience = JwtConfiguration.GetAudience(config),
+            SigningCredentials = new SigningCredentials(chaveAssinatura, SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = manipuladorToken.CreateToken(descricaoToken);

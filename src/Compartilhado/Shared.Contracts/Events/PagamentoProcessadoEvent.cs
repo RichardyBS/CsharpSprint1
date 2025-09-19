@@ -6,7 +6,7 @@ public record EventoPagamentoProcessado(
     Guid EventoId, // ID do evento
     DateTime OcorreuEm, // quando aconteceu
     Guid TransacaoId, // ID da transação - tipo comprovante
-    int ClienteId, // quem pagou
+    Guid ClienteId, // quem pagou
     decimal Valor, // quanto foi
     string MetodoPagamento, // como pagou (cartão, pix, etc)
     string Status, // se deu certo ou não

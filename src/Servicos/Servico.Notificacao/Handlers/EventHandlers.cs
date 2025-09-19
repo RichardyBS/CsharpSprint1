@@ -21,7 +21,7 @@ public class VagaOcupadaEventHandler
         {
             var notificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Vaga Ocupada",
                 Mensagem = $"Sua vaga {@event.CodigoVaga} foi ocupada com sucesso às {@event.DataEntrada:HH:mm}.",
                 Tipo = "InApp",
@@ -33,7 +33,7 @@ public class VagaOcupadaEventHandler
             // Enviar também por email se configurado
             var emailNotificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Confirmação de Ocupação de Vaga",
                 Mensagem = $@"
                     <h2>Vaga Ocupada com Sucesso</h2>
@@ -78,7 +78,7 @@ public class VagaLiberadaEventHandler
         {
             var notificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Vaga Liberada",
                 Mensagem = $"Sua vaga {@event.CodigoVaga} foi liberada. Tempo: {@event.TempoOcupacao.TotalHours:F1}h. Valor cobrado: R$ {@event.ValorCobrado:F2}",
                 Tipo = "InApp",
@@ -90,7 +90,7 @@ public class VagaLiberadaEventHandler
             // Enviar também por email com detalhes completos
             var emailNotificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Vaga Liberada - Resumo da Utilização",
                 Mensagem = $@"
                     <h2>Vaga Liberada</h2>
@@ -137,7 +137,7 @@ public class PagamentoProcessadoEventHandler
         {
             var notificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Pagamento Processado",
                 Mensagem = $"Seu pagamento de R$ {@event.Valor:F2} foi processado com sucesso via {@event.MetodoPagamento}. Status: {@event.Status}",
                 Tipo = "InApp",
@@ -149,7 +149,7 @@ public class PagamentoProcessadoEventHandler
             // Enviar também por email
             var emailNotificacao = new Notificacao
             {
-                ClienteId = Guid.Parse(@event.ClienteId.ToString()),
+                ClienteId = @event.ClienteId,
                 Titulo = "Confirmação de Pagamento",
                 Mensagem = $@"
                     <h2>Pagamento Processado com Sucesso</h2>

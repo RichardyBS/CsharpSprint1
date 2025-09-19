@@ -41,7 +41,7 @@ construtorApp.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true, // valida a assinatura
             ValidIssuer = configuracoesJwt["Emissor"] ?? "CobrancaEstacionamentoAPI",
             ValidAudience = configuracoesJwt["Audiencia"] ?? "ClientesCobranca",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(chaveSecreta))
+            IssuerSigningKey = new SymmetricSecurityKey(chaveSecreta)
         };
     });
 
@@ -88,6 +88,8 @@ aplicacao.MapHealthChecks("/saude"); // endpoint de health check em português
 
 // Inscrevendo nos eventos - aqui que a coisa fica interessante
 // WARN: se der exception aqui, o serviço não sobe
+// TEMPORÁRIO: Comentado para teste sem RabbitMQ
+/*
 var barramento = aplicacao.Services.GetRequiredService<IBarramentoEventos>();
 var provedorServicos = aplicacao.Services;
 
@@ -98,13 +100,17 @@ barramento.Inscrever<EventoVagaLiberada>(async (evento) =>
     var manipulador = escopo.ServiceProvider.GetRequiredService<VagaLiberadaEventHandler>();
     await manipulador.Handle(evento); // processa o evento de vaga liberada
 });
+*/
 
 // Inicializando o banco - garantindo que tá tudo configurado
 // TODO: migrar pra migrations quando tiver paciência
+// TEMPORÁRIO: Comentado para teste sem banco
+/*
 using (var escopo = aplicacao.Services.CreateScope())
 {
     var contexto = escopo.ServiceProvider.GetRequiredService<BillingDbContext>();
-    await contexto.InitializeAsync(); // inicializa as collections do mongo
+    await contexto.Database.EnsureCreatedAsync(); // garante que o banco existe
 }
+*/
 
 aplicacao.Run(); // roda a aplicação - aqui que a mágica acontece

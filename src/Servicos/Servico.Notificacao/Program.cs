@@ -111,6 +111,8 @@ aplicacao.MapHealthChecks("/saude"); // endpoint de health check
 aplicacao.MapHub<HubNotificacao>("/hubNotificacao"); // hub das notificações
 
 // Inscrevendo nos eventos - aqui que a coisa fica interessante
+// TEMPORÁRIO: Comentado para teste sem RabbitMQ
+/*
 var barramento = aplicacao.Services.GetRequiredService<IBarramentoEventos>();
 var provedorServicos = aplicacao.Services;
 
@@ -137,5 +139,6 @@ barramento.Inscrever<EventoPagamentoProcessado>(async (evento) =>
     var manipulador = escopo.ServiceProvider.GetRequiredService<PagamentoProcessadoEventHandler>();
     await manipulador.Handle(evento); // processa o evento
 });
+*/
 
 aplicacao.Run(); // roda a aplicação - que comece o show!

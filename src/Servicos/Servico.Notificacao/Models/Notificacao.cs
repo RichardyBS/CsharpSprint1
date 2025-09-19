@@ -14,6 +14,7 @@ public class Notificacao
     public string Status { get; set; } = "Pendente"; // Pendente, Enviada, Falha - status da entrega
     public DateTime CriadaEm { get; set; } = DateTime.UtcNow; // quando foi criada
     public DateTime? EnviadaEm { get; set; } // quando foi enviada (se foi)
+    public bool Lida { get; set; } = false; // se foi lida pelo cliente
     public string? Destinatario { get; set; } // pra onde vai (email, telefone, etc)
     public Dictionary<string, object> Dados { get; set; } = new(); // dados extras se precisar
     public int TentativasEnvio { get; set; } = 0; // quantas vezes tentou enviar

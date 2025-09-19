@@ -9,6 +9,7 @@ namespace Notification.Service.Services;
 public interface INotificationService
 {
     Task<bool> EnviarNotificacaoAsync(Notificacao notificacao);
+    Task<bool> EnviarNotificacaoAsync(Guid clienteId, string titulo, string mensagem, string tipo, Dictionary<string, object>? dados = null);
     Task<bool> EnviarEmailAsync(string destinatario, string assunto, string corpo);
     Task<bool> EnviarSmsAsync(string telefone, string mensagem);
     Task<bool> EnviarPushAsync(Guid clienteId, string titulo, string mensagem);
@@ -108,6 +109,20 @@ public class NotificationService : INotificationService
             
             return false;
         }
+    }
+
+    public async Task<bool> EnviarNotificacaoAsync(Guid clienteId, string titulo, string mensagem, string tipo, Dictionary<string, object>? dados = null)
+    {
+        var notificacao = new Notificacao
+        {
+            ClienteId = clienteId,
+            Titulo = titulo,
+            Mensagem = mensagem,
+            Tipo = tipo,
+            Dados = dados ?? new Dictionary<string, object>()
+        };
+
+        return await EnviarNotificacaoAsync(notificacao);
     }
 
     public async Task<bool> EnviarEmailAsync(string destinatario, string assunto, string corpo)

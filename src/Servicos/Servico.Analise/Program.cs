@@ -54,7 +54,7 @@ construtorApp.Services.AddScoped<VagaLiberadaEventHandler>();
 
 // Health checks pra saber se tá vivo ou morto
 construtorApp.Services.AddHealthChecks()
-    .AddDbContext<AnalyticsDbContext>();
+    .AddDbContextCheck<AnalyticsDbContext>();
 
 // CORS liberado pra geral - segurança é overrated mesmo né
 // FIXME: restringir isso em produção (se um dia chegar lá)
@@ -88,6 +88,8 @@ aplicacao.MapHealthChecks("/saude"); // mudei pra português, mais brasileiro n�
 
 // Inscrevendo nos eventos - aqui que a mágica acontece
 // WARN: se der exception aqui, o serviço não sobe
+// TEMPORÁRIO: Comentado para teste sem RabbitMQ
+/*
 var barramento = aplicacao.Services.GetRequiredService<IBarramentoEventos>();
 var provedorServicos = aplicacao.Services;
 
@@ -106,13 +108,17 @@ barramento.Inscrever<EventoVagaLiberada>(async (evento) =>
     var manipulador = escopo.ServiceProvider.GetRequiredService<VagaLiberadaEventHandler>();
     await manipulador.Handle(evento); // mesma coisa aqui
 });
+*/
 
 // Garantindo que o banco existe - se não existir, cria na marra
 // TODO: migrar pra migrations quando tiver paciência
+// TEMPORÁRIO: Comentado para teste sem banco
+/*
 using (var escopo = aplicacao.Services.CreateScope())
 {
     var contexto = escopo.ServiceProvider.GetRequiredService<AnalyticsDbContext>();
     contexto.Database.EnsureCreated(); // força a criação do banco
 }
+*/
 
 aplicacao.Run(); // BORA ANALISAR ESSES DADOS! 📊🚀

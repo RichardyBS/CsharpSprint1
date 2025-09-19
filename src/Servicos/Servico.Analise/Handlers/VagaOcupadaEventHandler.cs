@@ -22,7 +22,7 @@ public class VagaOcupadaEventHandler
         {
             var ocupacao = new OcupacaoVaga
             {
-                Id = @event.EventId,
+                Id = @event.EventoId,
                 VagaId = @event.VagaId,
                 CodigoVaga = @event.CodigoVaga,
                 ClienteId = @event.ClienteId,

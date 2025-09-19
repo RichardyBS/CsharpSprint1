@@ -81,7 +81,7 @@ public class ControladorAnalise : ControllerBase
         var ocupacoes = await consulta
             .Skip((pagina - 1) * tamanhoPagina) // pula as páginas anteriores
             .Take(tamanhoPagina) // pega só o que precisa
-            .OrderByDescending(o => o.DataHoraInicio) // mais recentes primeiro
+            .OrderByDescending(o => o.DataEntrada) // mais recentes primeiro
             .ToListAsync();
 
         // Montando o resultado paginado - padrão da casa
@@ -130,7 +130,7 @@ public class ControladorAnalise : ControllerBase
     {
         // Buscando todas as ocupações do dia - query simples
         var ocupacoes = await _contexto.OcupacoesVagas
-            .Where(o => o.DataHoraInicio.Date == data.Date)
+            .Where(o => o.DataEntrada.Date == data.Date)
             .ToListAsync();
 
         // Fazendo as contas - matemática básica do ensino médio
@@ -154,7 +154,7 @@ public class ControladorAnalise : ControllerBase
     {
         // Buscando ocupações do período - pode ser pesado se for muito tempo
         var ocupacoes = await _contexto.OcupacoesVagas
-            .Where(o => o.DataHoraInicio >= inicio && o.DataHoraInicio <= fim)
+            .Where(o => o.DataEntrada >= inicio && o.DataEntrada <= fim)
             .ToListAsync();
 
         // Calculando as métricas do período todo
@@ -178,7 +178,7 @@ public class ControladorAnalise : ControllerBase
     private async Task<List<object>> ObterTopClientes(DateTime dataInicio)
     {
         return await _contexto.OcupacoesVagas
-            .Where(o => o.DataHoraInicio >= dataInicio && o.Status == "Liberada") // só os que pagaram
+            .Where(o => o.DataEntrada >= dataInicio && o.Status == "Liberada") // só os que pagaram
             .GroupBy(o => o.ClienteId) // agrupando por cliente
             .Select(g => new
             {

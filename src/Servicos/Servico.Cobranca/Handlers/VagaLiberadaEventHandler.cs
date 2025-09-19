@@ -22,22 +22,20 @@ public class VagaLiberadaEventHandler
             _logger.LogInformation("Processando liberação de vaga {VagaId} para cliente {ClienteId}", 
                 @event.VagaId, @event.ClienteId);
 
-            // Calcular tempo de ocupação e valor
-            var tempoOcupacao = @event.DataSaida - @event.DataEntrada;
-            var valorHora = 5.0m; // Valor fixo por hora (em produção viria de configuração)
-            var horasOcupacao = (decimal)Math.Ceiling(tempoOcupacao.TotalHours);
-            var valorTotal = horasOcupacao * valorHora;
+            // Usar os dados já calculados do evento
+            var tempoOcupacao = @event.TempoOcupacao;
+            var valorTotal = @event.ValorCobrado;
 
             // Criar item da fatura
             var itemFatura = new ItemFatura
             {
-                OcupacaoId = @event.Id,
+                OcupacaoId = @event.EventoId,
                 VagaId = @event.VagaId,
                 CodigoVaga = @event.CodigoVaga,
-                DataEntrada = @event.DataEntrada,
+                DataEntrada = @event.DataSaida.Subtract(@event.TempoOcupacao), // Calcular data entrada
                 DataSaida = @event.DataSaida,
                 TempoOcupacao = tempoOcupacao,
-                ValorHora = valorHora,
+                ValorHora = @event.TempoOcupacao.TotalHours > 0 ? @event.ValorCobrado / (decimal)@event.TempoOcupacao.TotalHours : 0,
                 ValorTotal = valorTotal,
                 Descricao = $"Ocupação da vaga {@event.CodigoVaga} - {tempoOcupacao.TotalHours:F2}h"
             };
@@ -46,7 +44,7 @@ public class VagaLiberadaEventHandler
             var fatura = await _faturamentoService.GerarFaturaAsync(@event.ClienteId, new List<ItemFatura> { itemFatura });
 
             _logger.LogInformation("Fatura {NumeroFatura} gerada para ocupação {OcupacaoId}", 
-                fatura.NumeroFatura, @event.Id);
+                fatura.NumeroFatura, @event.EventoId);
         }
         catch (Exception ex)
         {

@@ -133,6 +133,18 @@ public class OpcoesRabbitMQ
 {
     public string NomeHost { get; set; } = "localhost"; // onde tá rodando o RabbitMQ
     public int Porta { get; set; } = 5672; // porta padrão
-    public string NomeUsuario { get; set; } = "guest"; // usuário padrão
-    public string Senha { get; set; } = "guest"; // senha padrão
+    public string NomeUsuario { get; set; } = "guest"; // usuário padrão - deve vir da configuração
+    public string Senha { get; set; } = "guest"; // senha padrão - deve vir da configuração
+    
+    // Método para configurar com variáveis de ambiente
+    public static OpcoesRabbitMQ CriarDaConfiguracao()
+    {
+        return new OpcoesRabbitMQ
+        {
+            NomeHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost",
+            Porta = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out var porta) ? porta : 5672,
+            NomeUsuario = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest",
+            Senha = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest"
+        };
+    }
 }

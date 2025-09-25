@@ -1,0 +1,263 @@
+{
+  "info": {
+    "name": "MotoNotificationController - API Tests",
+    "description": "Coleção de comandos Postman para testar todos os endpoints do MotoNotificationController",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5003",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "Bearer YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "health"]
+        },
+        "description": "Verifica se o serviço está funcionando corretamente"
+      },
+      "response": []
+    },
+    {
+      "name": "Processar Entrada de Moto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"clienteId\": \"123e4567-e89b-12d3-a456-426614174001\",\n  \"placa\": \"ABC1234\",\n  \"modelo\": \"Honda CB 600F\",\n  \"ano\": 2023,\n  \"cor\": \"Azul\",\n  \"status\": \"Ativo\",\n  \"idVaga\": 15,\n  \"dataEntrada\": \"2025-01-27T10:30:00Z\",\n  \"dataHora\": \"2025-01-27T10:30:00Z\",\n  \"processado\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/entrada",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "entrada"]
+        },
+        "description": "Processa a entrada de uma moto no estacionamento"
+      },
+      "response": []
+    },
+    {
+      "name": "Processar Saída de Moto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174002\",\n  \"clienteId\": \"123e4567-e89b-12d3-a456-426614174001\",\n  \"placa\": \"ABC1234\",\n  \"idVaga\": 15,\n  \"dataSaida\": \"2025-01-27T14:30:00Z\",\n  \"dataHora\": \"2025-01-27T14:30:00Z\",\n  \"valorCobrado\": 25.50,\n  \"processado\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/saida",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "saida"]
+        },
+        "description": "Processa a saída de uma moto do estacionamento"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Notificações do Cliente",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/cliente/123e4567-e89b-12d3-a456-426614174001",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "cliente", "123e4567-e89b-12d3-a456-426614174001"]
+        },
+        "description": "Busca todas as notificações de um cliente específico"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Notificações Não Lidas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/cliente/123e4567-e89b-12d3-a456-426614174001/nao-lidas",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "cliente", "123e4567-e89b-12d3-a456-426614174001", "nao-lidas"]
+        },
+        "description": "Busca apenas as notificações não lidas de um cliente"
+      },
+      "response": []
+    },
+    {
+      "name": "Marcar Notificação como Lida",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"notificacaoId\": \"123e4567-e89b-12d3-a456-426614174003\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/marcar-lida",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "marcar-lida"]
+        },
+        "description": "Marca uma notificação específica como lida"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Logs de Movimentação",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/logs?dataInicio=2025-01-01&dataFim=2025-01-31&placa=ABC1234",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "logs"],
+          "query": [
+            {
+              "key": "dataInicio",
+              "value": "2025-01-01"
+            },
+            {
+              "key": "dataFim",
+              "value": "2025-01-31"
+            },
+            {
+              "key": "placa",
+              "value": "ABC1234"
+            }
+          ]
+        },
+        "description": "Busca logs de movimentação com filtros opcionais"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Estatísticas do Estacionamento",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/estatisticas",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "estatisticas"]
+        },
+        "description": "Obtém estatísticas gerais do estacionamento"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Informações da Moto",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/moto/ABC1234",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "moto", "ABC1234"]
+        },
+        "description": "Busca informações de uma moto específica pela placa"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Informações da Vaga",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/vaga/15",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "vaga", "15"]
+        },
+        "description": "Busca informações de uma vaga específica pelo ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar Vagas Livres por Linha",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/motos/notificacoes/vagas-livres/A",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "motos", "notificacoes", "vagas-livres", "A"]
+        },
+        "description": "Busca todas as vagas livres em uma linha específica"
+      },
+      "response": []
+    }
+  ]
+}

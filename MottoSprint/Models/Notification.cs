@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using MottoSprint.Models.Hateoas;
 
 namespace MottoSprint.Models;
 
@@ -19,4 +22,15 @@ public class Notification
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? ReadAt { get; set; }
+
+    // Propriedades para integração com sistema de motos/vagas
+    public string? PlacaMoto { get; set; }
+    public int? VagaId { get; set; }
+    public string NotificationType { get; set; } = "GENERAL"; // MOTO_ENTRADA, MOTO_SAIDA, VAGA_OCUPADA, VAGA_LIBERADA, GENERAL
+    public string Priority { get; set; } = "NORMAL"; // LOW, NORMAL, HIGH, URGENT
+    
+    // HATEOAS Links
+    [NotMapped]
+    [JsonPropertyName("_links")]
+    public Dictionary<string, Link> Links { get; set; } = new();
 }

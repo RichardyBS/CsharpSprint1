@@ -22,13 +22,33 @@ public class ParkingController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém todas as vagas de estacionamento com paginação e links HATEOAS
+    /// Listar todas as vagas do estacionamento
     /// </summary>
+    /// <remarks>
+    /// PASSO A PASSO PARA TESTAR:
+    /// 1. Clique em "Try it out"
+    /// 2. (Opcional) Configure a paginação:
+    ///    - page: número da página (padrão: 1)
+    ///    - pageSize: vagas por página (padrão: 10)
+    /// 3. Clique em "Execute"
+    /// 4. Observe a lista de vagas retornada
+    /// 5. Verifique o status de cada vaga (ocupada/livre)
+    /// 6. Use os links HATEOAS para navegar entre páginas
+    /// 
+    /// O QUE VOCÊ VERÁ:
+    /// - spotNumber: Identificação da vaga (ex: "A001", "B002")
+    /// - isOccupied: true se ocupada, false se livre
+    /// - createdAt: Data de criação da vaga
+    /// - links: Ações disponíveis para cada vaga
+    /// 
+    /// DICA: Este é um bom endpoint para começar os testes!
+    /// </remarks>
     /// <param name="page">Número da página (padrão: 1)</param>
     /// <param name="pageSize">Tamanho da página (padrão: 10)</param>
     /// <returns>Lista paginada de vagas com links de navegação</returns>
     /// <response code="200">Lista de vagas retornada com sucesso</response>
     [HttpGet("spots")]
+    [ProducesResponseType(typeof(PagedResource<ParkingSpotResource>), 200)]
     public async Task<ActionResult<PagedResource<ParkingSpotResource>>> GetAllSpots([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var spots = await _parkingService.GetAllSpotsAsync();

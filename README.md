@@ -1,432 +1,248 @@
-# Sistema de Estacionamento - Microserviços
+# MottoSprint - Sistema de Gerenciamento de Estacionamento de Motocicletas
 
-Sistema completo de gerenciamento de estacionamento implementado com arquitetura de microserviços usando .NET 8.
+## 📋 Sobre o Projeto
 
-## Arquitetura
+O **MottoSprint** é uma API REST desenvolvida em .NET 8 para gerenciamento de estacionamento de motocicletas, criada como parte do Challenge FIAP 2025. O sistema oferece funcionalidades completas para controle de entrada e saída de motos, notificações em tempo real e compatibilidade com APIs Java existentes.
 
-O sistema é composto por:
+### 🎯 Funcionalidades Principais
 
-- **API Gateway**: Ponto de entrada único para todas as requisições
-- **Analytics Service**: Análise de dados e relatórios (PostgreSQL)
-- **Billing Service**: Faturamento e pagamentos (MongoDB)
-- **Notification Service**: Notificações em tempo real (Redis + SignalR)
-- **Event Bus**: Comunicação assíncrona entre serviços (RabbitMQ)
+- **Gerenciamento de Motocicletas**: CRUD completo com validações
+- **Sistema de Estacionamento**: Controle de vagas com posicionamento (linha/coluna)
+- **Notificações em Tempo Real**: Sistema de notificações com SignalR
+- **Compatibilidade Java**: Endpoints compatíveis com APIs Java existentes
+- **HATEOAS**: Implementação completa de links relacionados
+- **Documentação Swagger**: Interface interativa para testes
+- **Autenticação JWT**: Sistema de segurança robusto
 
-## Tecnologias Utilizadas
+## 👥 Integrantes do Projeto
 
-- **.NET 8**: Framework principal
-- **PostgreSQL**: Banco de dados para Analytics
-- **MongoDB**: Banco de dados para Billing
-- **Redis**: Cache e armazenamento de notificações
-- **RabbitMQ**: Message broker para eventos
-- **SignalR**: Comunicação em tempo real
-- **Docker**: Containerização
-- **JWT**: Autenticação e autorização
+| Nome | RM | Responsabilidade |
+|------|----|--------------------|
+| **Ruan Lima Silva** | RM558775 | Java e DevOps |
+| **Richardy Borges Santana** | RM557883 | .NET e Banco de Dados |
+| **Marcos Vinicius Pereira de Oliveira** | RM557252 | Mobile e IoT |
 
-## Como Executar
+## 🛠️ Tecnologias Utilizadas
 
-### Pré-requisitos
-
-- Docker e Docker Compose
-- .NET 8 SDK (para desenvolvimento)
-- PowerShell (para scripts de automação)
-
-### 🚀 Setup Rápido (Recomendado)
-
-1. Clone o repositório
-2. Execute o script de setup:
-
-```powershell
-.\setup-environment.ps1
-```
-
-Este script irá:
-- Criar o arquivo `.env` a partir do template
-- Verificar dependências (Docker, .NET)
-- Restaurar pacotes NuGet
-- Compilar o projeto
-- Subir os containers Docker
-- Mostrar status dos serviços
-
-### 🔧 Setup Manual
-
-1. **Configure as variáveis de ambiente:**
-```bash
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-```
-
-2. **Restaure as dependências:**
-```bash
-dotnet restore EstacionamentoMicroservices.sln
-```
-
-3. **Compile o projeto:**
-```bash
-dotnet build EstacionamentoMicroservices.sln
-```
-
-4. **Execute com Docker:**
-```bash
-docker-compose up -d
-```
-
-### 🔐 Configuração de Segurança
-
-O projeto utiliza variáveis de ambiente para configurações sensíveis. Consulte:
-- **`.env.example`** - Template de configuração
-- **`ENVIRONMENT_SETUP.md`** - Guia detalhado de configuração
-
-**IMPORTANTE**: Nunca commite o arquivo `.env` no Git!
-
-### Serviços Disponíveis
-
-- **API Gateway**: http://localhost:5000
-- **Analytics Service**: http://localhost:5001
-- **Billing Service**: http://localhost:5002
-- **Notification Service**: http://localhost:5003
-- **RabbitMQ Management**: http://localhost:15672 (guest/guest)
-
-### Bancos de Dados
-
-- **PostgreSQL**: localhost:5432 (postgres/postgres123)
-- **MongoDB**: localhost:27017 (admin/admin123)
-- **Redis**: localhost:6379
-
-## Funcionalidades
-
-### Analytics Service
-- Registro de eventos de ocupação/liberação de vagas
-- Relatórios de uso por período
-- Estatísticas de ocupação
-- Análise de receita
-
-### Billing Service
-- Geração automática de faturas
-- Processamento de pagamentos
-- Histórico de transações
-- Relatórios financeiros
-
-### Notification Service
-- Notificações em tempo real via SignalR
-- Notificações por email
-- Cache de notificações no Redis
-- Configurações personalizadas
-
-## Eventos do Sistema
-
-- `VagaOcupadaEvent`: Disparado quando uma vaga é ocupada
-- `VagaLiberadaEvent`: Disparado quando uma vaga é liberada
-- `PagamentoProcessadoEvent`: Disparado quando um pagamento é processado
-
-## Desenvolvimento
-
-### Estrutura do Projeto
-
-```
-src/
-├── ApiGateway/              # Gateway de entrada
-├── Services/
-│   ├── Analytics.Service/   # Serviço de análise
-│   ├── Billing.Service/     # Serviço de faturamento
-│   └── Notification.Service/ # Serviço de notificações
-└── Shared/
-    ├── Shared.Contracts/    # Contratos compartilhados
-    └── Shared.EventBus/     # Event Bus compartilhado
-```
-
-### Executando em Desenvolvimento
-
-1. Inicie a infraestrutura:
-```bash
-docker-compose up postgres mongodb redis rabbitmq -d
-```
-
-2. Execute cada serviço individualmente:
-```bash
-cd src/Services/Analytics.Service
-dotnet run
-
-cd src/Services/Billing.Service
-dotnet run
-
-cd src/Services/Notification.Service
-dotnet run
-
-cd src/ApiGateway
-dotnet run
-```
-
-## Monitoramento
-
-- Health checks disponíveis em `/health` para cada serviço
-- Logs estruturados para observabilidade
-- Métricas de performance integradas
-
-## Segurança
-
-- Autenticação JWT em todos os serviços
-- Validação de tokens
-- CORS configurado
-- Comunicação segura entre serviços
-
-## Funcionalidades
-
-### Gestão de Clientes
-- ✅ CRUD completo de clientes
-- ✅ Validação de CPF e email únicos
-- ✅ Paginação e filtros de busca
-- ✅ Soft delete para preservar histórico
-
-### Gestão de Motocicletas
-- ✅ CRUD completo de motos
-- ✅ Relacionamento com clientes
-- ✅ Validação de placa única
-- ✅ Filtros por marca, modelo e ano
-
-### Gestão de Vagas
-- ✅ CRUD completo de vagas
-- ✅ Sistema de ocupação e liberação
-- ✅ Cálculo automático de valores
-- ✅ Controle de tempo de estacionamento
-- ✅ Relatórios de ocupação
-
-### Recursos Avançados
-- ✅ **Paginação** em todas as listagens
-- ✅ **HATEOAS** (Hypermedia as the Engine of Application State)
-- ✅ **Swagger/OpenAPI** com documentação completa
-- ✅ **Logging** estruturado
-- ✅ **Validações** robustas com Data Annotations
-- ✅ **Status codes HTTP** apropriados
-- ✅ **CORS** configurado
-- ✅ **Entity Framework Core** com migrations
-
-## Tecnologias Utilizadas
-
-- **.NET 8** - Framework principal
-- **ASP.NET Core Web API** - Para criação da API REST
+- **.NET 8.0** - Framework principal
 - **Entity Framework Core** - ORM para acesso a dados
-- **SQL Server** - Banco de dados
+- **SQLite** - Banco de dados (desenvolvimento)
+- **SignalR** - Comunicação em tempo real
 - **Swagger/OpenAPI** - Documentação da API
-- **FluentValidation** - Validações avançadas
-- **Serilog** - Logging estruturado
+- **JWT** - Autenticação e autorização
+- **Docker** - Containerização
+- **xUnit** - Testes unitários
 
 ## 📋 Pré-requisitos
 
-- .NET 8 SDK
-- SQL Server (LocalDB ou instância completa)
-- Visual Studio 2022 ou VS Code
+Antes de executar o projeto, certifique-se de ter instalado:
 
-## 🚀 Como Executar
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/) (opcional)
 
-### 1. Clone o repositório
-```bash
-git clone <url-do-repositorio>
-cd MotoApiAdvanced
+## 🚀 Como Executar o Projeto
+
+### Opção 1: Execução Local (Recomendada)
+
+1. **Clone o repositório:**
+   ```bash
+   git clone <url-do-repositorio>
+   cd CsharpSprint1
+   ```
+
+2. **Restaure as dependências:**
+   ```bash
+   dotnet restore
+   ```
+
+3. **Execute as migrações do banco de dados:**
+   ```bash
+   cd MottoSprint
+   dotnet ef database update
+   ```
+
+4. **Execute a aplicação:**
+   ```bash
+   dotnet run
+   ```
+
+5. **Acesse a aplicação:**
+   - **API**: http://localhost:5003
+   - **Swagger UI**: http://localhost:5003/swagger
+   - **HTTPS**: https://localhost:7000
+
+### Opção 2: Execução com Docker
+
+1. **Build e execute com Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Acesse a aplicação:**
+   - **API**: http://localhost:5003
+   - **Swagger UI**: http://localhost:5003/swagger
+
+## 📚 Estrutura do Projeto
+
+```
+MottoSprint/
+├── Controllers/           # Controladores da API
+├── Models/               # Modelos de dados
+├── DTOs/                 # Data Transfer Objects
+├── Services/             # Lógica de negócio
+├── Data/                 # Contexto do banco de dados
+├── Configuration/        # Configurações da aplicação
+├── Extensions/           # Métodos de extensão
+├── Hubs/                 # SignalR Hubs
+├── Migrations/           # Migrações do banco
+└── Swagger/              # Configurações do Swagger
+
+Database/                 # Scripts SQL
+├── 00_SETUP_USER.sql
+├── 01_CREATE_TABLES.sql
+├── 02_INSERT_SAMPLE_DATA.sql
+├── 03_PROCEDURES_FUNCTIONS.sql
+└── 04_VIEWS.sql
+
+MottoSprint.Tests/        # Testes unitários
+docs/                     # Documentação adicional
 ```
 
-### 2. Configure a string de conexão
-Edite o arquivo ppsettings.json e ajuste a string de conexão conforme seu ambiente:
+## 🔧 Configuração
 
-```json
-{
-  \"ConnectionStrings\": {
-    \"DefaultConnection\": \"Server=(localdb)\\mssqllocaldb;Database=MotoApiAdvancedDb;Trusted_Connection=true;MultipleActiveResultSets=true\"
-  }
-}
-`
+### Banco de Dados
 
-### 3. Execute as migrations
+O projeto utiliza SQLite por padrão para desenvolvimento. Para usar outro banco:
+
+1. Modifique a string de conexão em `appsettings.json`
+2. Execute as migrações: `dotnet ef database update`
+
+### Variáveis de Ambiente
+
+Configure as seguintes variáveis se necessário:
+
 ```bash
-dotnet ef database update
+ASPNETCORE_ENVIRONMENT=Development
+ConnectionStrings__DefaultConnection="Data Source=mottosprint.db"
 ```
 
-### 4. Execute a aplicação
-```bash
-dotnet run
-```
+## 📖 Documentação da API
 
-### 5. Acesse a documentação
-Abra seu navegador e acesse: http://localhost:5297/swagger
+### Guia de Testes Completo
 
-## Documentação da API
+Para facilitar os testes da API, criamos guias detalhados:
+
+- **[TestesAPI.md](./TestesAPI.md)** - Guia completo com passo a passo para testar via Swagger UI
+- **[ExemplosCURL.md](./ExemplosCURL.md)** - Exemplos de testes via linha de comando (cURL)
 
 ### Endpoints Principais
 
-#### Clientes
-- GET /api/clientes - Lista clientes com paginação
-- GET /api/clientes/{id} - Obtém cliente específico
-- POST /api/clientes - Cria novo cliente
-- PUT /api/clientes/{id} - Atualiza cliente
-- DELETE /api/clientes/{id} - Remove cliente (soft delete)
+#### Motocicletas (Java Compatible)
+- `GET /api/motos` - Listar motocicletas
+- `POST /api/motos` - Criar motocicleta
+- `GET /api/motos/{placa}` - Buscar por placa
+- `PUT /api/motos/{placa}` - Atualizar motocicleta
+- `DELETE /api/motos/{placa}` - Remover motocicleta
+- `POST /api/motos/entrada` - Entrada no estacionamento
+- `POST /api/motos/retirarVaga/{placa}` - Saída do estacionamento
 
-#### Motos
-- GET /api/motos - Lista motos com paginação
-- GET /api/motos/{id} - Obtém moto específica
-- POST /api/motos - Cadastra nova moto
-- PUT /api/motos/{id} - Atualiza moto
-- DELETE /api/motos/{id} - Remove moto (soft delete)
+#### Notificações
+- `GET /api/notification` - Listar notificações
+- `POST /api/notification` - Criar notificação
+- `PUT /api/notification/{id}/read` - Marcar como lida
 
-#### Vagas
-- GET /api/vagas - Lista vagas com paginação
-- GET /api/vagas/{id} - Obtém vaga específica
-- POST /api/vagas - Cria nova vaga
-- PUT /api/vagas/{id} - Atualiza vaga
-- DELETE /api/vagas/{id} - Remove vaga (soft delete)
-- POST /api/vagas/{id}/ocupar - Ocupa vaga com uma moto
-- POST /api/vagas/{id}/liberar - Libera vaga e calcula valor
+#### Estacionamento
+- `GET /api/parking/spots` - Listar vagas
+- `GET /api/parking/spots/available` - Vagas disponíveis
 
-### Parâmetros de Paginação
-
-Todos os endpoints de listagem suportam os seguintes parâmetros:
-
-- pageNumber (int): Número da página (padrão: 1)
-- pageSize (int): Itens por página (padrão: 10, máximo: 100)
-- search (string): Termo de busca
-- sortBy (string): Campo para ordenação
-- sortDescending (bool): Ordenação decrescente
-
-## Arquitetura
-
-### Estrutura do Projeto
-
-`
-MotoApiAdvanced/
-├── Controllers/          # Controllers da API
-│   ├── ClientesController.cs
-│   ├── MotosController.cs
-│   └── VagasController.cs
-├── Data/                # Contexto do Entity Framework
-│   └── AppDbContext.cs
-├── DTOs/                # Data Transfer Objects
-│   ├── ClienteDto.cs
-│   ├── MotoDto.cs
-│   ├── VagaDto.cs
-│   └── CommonDto.cs
-├── Models/              # Entidades do domínio
-│   ├── Cliente.cs
-│   ├── Moto.cs
-│   └── Vaga.cs
-├── Migrations/          # Migrations do EF Core
-├── Program.cs           # Configuração da aplicação
-└── appsettings.json     # Configurações
-`
-
-### Padrões Utilizados
-
-- **Repository Pattern** (através do Entity Framework)
-- **DTO Pattern** para transferência de dados
-- **HATEOAS** para navegação hipermídia
-- **Soft Delete** para preservar dados históricos
-- **Paginação** para performance em grandes volumes
-
-## 🔧 Configurações
-
-### Logging
-O projeto utiliza logging estruturado com diferentes níveis:
-- **Information**: Operações normais
-- **Warning**: Situações de atenção
-- **Error**: Erros de aplicação
-
-### CORS
-CORS está configurado para permitir qualquer origem em desenvolvimento. Para produção, configure adequadamente no Program.cs.
-
-### Swagger
-A documentação Swagger inclui:
-- Descrições detalhadas de todos os endpoints
-- Exemplos de request/response
-- Códigos de status HTTP
-- Modelos de dados
-
-## Banco de Dados
-
-### Modelo de Dados
-
-`
-Cliente (1) -----> (*) Moto (*) -----> (0..1) Vaga
-`
-
-#### Cliente
-- Id, Nome, CPF, Email, Telefone, DataNascimento, DataCadastro, Ativo
-
-#### Moto
-- Id, Placa, Marca, Modelo, Ano, Cor, Cilindrada, ClienteId, DataCadastro, Ativa
-
-#### Vaga
-- Id, Numero, Setor, Ocupada, ValorPorHora, DataEntrada, DataSaida, ValorTotal, MotoId, DataCriacao, Ativa
-
-### Dados de Exemplo
-
-O projeto inclui dados de exemplo que são inseridos automaticamente na primeira execução:
-
-- **2 Clientes** com informações completas
-- **2 Motos** associadas aos clientes
-- **5 Vagas** em diferentes setores
-
-## 🛠️ Scripts de Manutenção
-
-### Setup do Ambiente
-```powershell
-.\setup-environment.ps1
-```
-- Configura o ambiente completo
-- Verifica dependências
-- Compila e executa o projeto
-
-### Limpeza do Ambiente
-```powershell
-.\cleanup-environment.ps1
-```
-- Para e remove containers
-- Limpa volumes e imagens
-- Remove arquivos de build
-
-### Comandos Docker Úteis
+### Exemplo de Uso
 
 ```bash
-# Ver logs dos serviços
-docker-compose logs -f
+# Criar uma motocicleta
+curl -X POST "http://localhost:5003/api/motos" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "placa": "ABC1234",
+    "modelo": "Honda CB600F",
+    "ano": 2023,
+    "cor": "Azul",
+    "status": "Ativa"
+  }'
 
-# Reiniciar um serviço específico
-docker-compose restart notification-service
-
-# Parar todos os serviços
-docker-compose down
-
-# Rebuild e restart
-docker-compose up -d --build
+# Entrada no estacionamento
+curl -X POST "http://localhost:5003/api/motos/entrada" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "placa": "ABC1234",
+    "linha": 1,
+    "coluna": 2
+  }'
 ```
 
-## 📁 Arquivos de Configuração
+## 🧪 Executando os Testes
 
-- **`.env`** - Variáveis de ambiente (não commitado)
-- **`.env.example`** - Template de configuração
-- **`docker-compose.yml`** - Configuração dos containers
-- **`ENVIRONMENT_SETUP.md`** - Guia detalhado de configuração
+```bash
+# Executar todos os testes
+dotnet test
 
-## Deploy
+# Executar testes com cobertura
+dotnet test --collect:"XPlat Code Coverage"
 
-### Preparação para Produção
+# Executar testes específicos
+dotnet test --filter "ClassName=JavaCompatibleControllerTests"
+```
 
-1. **Configure as variáveis de ambiente** para o ambiente de produção
-2. **Ajuste o CORS** para permitir apenas origens autorizadas
-3. **Configure logs** para um provedor adequado (Application Insights, etc.)
-4. **Desabilite o Swagger** em produção (opcional)
-5. **Use chaves JWT seguras** e diferentes para cada ambiente
+## 🐳 Docker
 
-## Contribuição
+### Build da Imagem
+```bash
+docker build -t mottosprint .
+```
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (git checkout -b feature/AmazingFeature)
-3. Commit suas mudanças (git commit -m 'Add some AmazingFeature')
-4. Push para a branch (git push origin feature/AmazingFeature)
-5. Abra um Pull Request
+### Executar Container
+```bash
+docker run -p 5003:8080 mottosprint
+```
 
-## Licença
+## 📊 Monitoramento e Logs
 
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+A aplicação inclui:
+- Logs estruturados com Serilog
+- Health checks em `/health`
+- Métricas de performance
+- Swagger UI para documentação interativa
 
-## Contato
+## 🔒 Segurança
 
-Para dúvidas ou sugestões, entre em contato através dos issues do GitHub.
+- Autenticação JWT implementada
+- Validação de entrada em todos os endpoints
+- CORS configurado adequadamente
+- Headers de segurança aplicados
+
+## 🚀 Deploy
+
+### Ambiente de Produção
+
+1. Configure as variáveis de ambiente de produção
+2. Use um banco de dados robusto (SQL Server, PostgreSQL)
+3. Configure HTTPS com certificados válidos
+4. Implemente monitoramento e logs centralizados
+
+## 📞 Suporte
+
+Para dúvidas ou problemas:
+
+1. Verifique a documentação no Swagger UI
+2. Consulte os logs da aplicação
+3. Execute os testes para validar o ambiente
+4. Entre em contato com a equipe de desenvolvimento
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins acadêmicos como parte do Challenge FIAP 2025.
+
+---
+
+**Desenvolvido com ❤️ pela equipe MottoSprint**
 

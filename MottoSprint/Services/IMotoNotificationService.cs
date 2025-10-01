@@ -60,15 +60,52 @@ public interface IMotoNotificationService
     /// <summary>
     /// Obtém informações da vaga
     /// </summary>
-    Task<Vaga?> ObterVagaAsync(Guid vagaId);
+    Task<VagaDb?> ObterVagaAsync(Guid vagaId);
 
     /// <summary>
     /// Obtém informações da moto
     /// </summary>
-    Task<Moto?> ObterMotoAsync(string placa);
+    Task<MotoDb?> ObterMotoAsync(string placa);
 
     /// <summary>
     /// Obtém informações do cliente
     /// </summary>
     Task<Cliente?> ObterClienteAsync(Guid clienteId);
+
+    /// <summary>
+    /// Obtém notificação por ID
+    /// </summary>
+    Task<MotoNotification?> ObterNotificacaoPorIdAsync(Guid id);
+
+    /// <summary>
+    /// Obtém logs de movimentação por moto específica
+    /// </summary>
+    Task<List<LogMovimentacao>> ObterLogsPorMotoAsync(string placa, DateTime? dataInicio = null, DateTime? dataFim = null);
+
+    /// <summary>
+    /// Obtém logs de movimentação com paginação
+    /// </summary>
+    Task<DTOs.PagedResultDto<DTOs.LogMovimentacaoDto>> ObterLogsMovimentacaoPaginadoAsync(
+        int pageNumber = 1, 
+        int pageSize = 10, 
+        DateTime? dataInicio = null, 
+        DateTime? dataFim = null);
+
+    /// <summary>
+    /// Obtém logs de movimentação por moto específica com paginação
+    /// </summary>
+    Task<DTOs.PagedResultDto<DTOs.LogMovimentacaoDto>> ObterLogsPorMotoPaginadoAsync(
+        string placa, 
+        int pageNumber = 1, 
+        int pageSize = 10, 
+        DateTime? dataInicio = null, 
+        DateTime? dataFim = null);
+
+    /// <summary>
+    /// Obtém notificações por cliente com paginação
+    /// </summary>
+    Task<DTOs.PagedResultDto<DTOs.MotoNotificationDto>> ObterNotificacoesPorClientePaginadoAsync(
+        Guid clienteId, 
+        int pageNumber = 1, 
+        int pageSize = 10);
 }

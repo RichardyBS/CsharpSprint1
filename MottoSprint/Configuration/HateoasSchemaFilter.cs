@@ -17,66 +17,17 @@ public class HateoasSchemaFilter : ISchemaFilter
             // Verificar se _links já foi adicionado para evitar duplicação
             if (!schema.Properties.ContainsKey("_links"))
             {
-                // Adicionar propriedade _links ao esquema
+                // Adicionar propriedade _links ao esquema de forma simplificada
                 schema.Properties.Add("_links", new OpenApiSchema
-            {
-                Type = "object",
-                Description = "Links de navegação HATEOAS",
-                AdditionalProperties = new OpenApiSchema
                 {
                     Type = "object",
-                    Properties = new Dictionary<string, OpenApiSchema>
+                    Description = "Links de navegação HATEOAS",
+                    AdditionalProperties = new OpenApiSchema
                     {
-                        ["href"] = new OpenApiSchema 
-                        { 
-                            Type = "string", 
-                            Description = "URL do recurso",
-                            Example = new Microsoft.OpenApi.Any.OpenApiString("http://localhost:5000/api/resource/1")
-                        },
-                        ["rel"] = new OpenApiSchema 
-                        { 
-                            Type = "string", 
-                            Description = "Relação do link",
-                            Example = new Microsoft.OpenApi.Any.OpenApiString("self")
-                        },
-                        ["method"] = new OpenApiSchema 
-                        { 
-                            Type = "string", 
-                            Description = "Método HTTP",
-                            Example = new Microsoft.OpenApi.Any.OpenApiString("GET")
-                        },
-                        ["type"] = new OpenApiSchema 
-                        { 
-                            Type = "string", 
-                            Description = "Tipo de conteúdo",
-                            Example = new Microsoft.OpenApi.Any.OpenApiString("application/json")
-                        },
-                        ["title"] = new OpenApiSchema 
-                        { 
-                            Type = "string", 
-                            Description = "Título descritivo do link",
-                            Example = new Microsoft.OpenApi.Any.OpenApiString("Link para este recurso")
-                        }
+                        Type = "object",
+                        Description = "Link HATEOAS"
                     }
-                },
-                Example = new Microsoft.OpenApi.Any.OpenApiObject
-                {
-                    ["self"] = new Microsoft.OpenApi.Any.OpenApiObject
-                    {
-                        ["href"] = new Microsoft.OpenApi.Any.OpenApiString("http://localhost:5000/api/resource/1"),
-                        ["rel"] = new Microsoft.OpenApi.Any.OpenApiString("self"),
-                        ["method"] = new Microsoft.OpenApi.Any.OpenApiString("GET"),
-                        ["title"] = new Microsoft.OpenApi.Any.OpenApiString("Link para este recurso")
-                    },
-                    ["update"] = new Microsoft.OpenApi.Any.OpenApiObject
-                    {
-                        ["href"] = new Microsoft.OpenApi.Any.OpenApiString("http://localhost:5000/api/resource/1"),
-                        ["rel"] = new Microsoft.OpenApi.Any.OpenApiString("update"),
-                        ["method"] = new Microsoft.OpenApi.Any.OpenApiString("PUT"),
-                        ["title"] = new Microsoft.OpenApi.Any.OpenApiString("Atualizar este recurso")
-                    }
-                }
-            });
+                });
             }
         }
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MottoSprint.Data;
 using MottoSprint.Services;
+using MottoSprint.Hubs;
 
 namespace MottoSprint.Configuration;
 
@@ -22,16 +23,24 @@ public static class ServiceCollectionExtensions
         // Entity Framework
         services.AddMottoSprintDatabase(configuration);
 
+        // HttpClient para integração com API Java
+        services.AddHttpClient<IJavaApiService, JavaApiService>();
+
+        // SignalR para notificações em tempo real
+        services.AddSignalR();
+
         // Serviços de negócio
         services.AddScoped<IParkingService, ParkingService>();
         services.AddScoped<IMotoNotificationService, MotoNotificationService>();
         services.AddScoped<MottoSprint.Interfaces.INotificationService, MottoSprint.Services.NotificationService>();
+        services.AddScoped<IJavaApiService, JavaApiService>();
+        services.AddScoped<IMotoNotificationIntegratedService, MotoNotificationIntegratedService>();
 
         return services;
     }
 
     /// <summary>
-    /// Adiciona e configura o Entity Framework
+    /// Adiciona e configura o Entity Framework com Oracle
     /// </summary>
     public static IServiceCollection AddMottoSprintDatabase(
         this IServiceCollection services,
@@ -42,32 +51,13 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<MottoSprintDbContext>(options =>
         {
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection") ?? databaseOptions.DefaultConnection,
-                sqlOptions =>
-                {
-                    if (databaseOptions.EnableRetryOnFailure)
-                    {
-                        sqlOptions.EnableRetryOnFailure(
-                            maxRetryCount: databaseOptions.MaxRetryCount,
-                            maxRetryDelay: TimeSpan.FromSeconds(databaseOptions.MaxRetryDelaySeconds),
-                            errorNumbersToAdd: null);
-                    }
-
-                    sqlOptions.CommandTimeout(databaseOptions.CommandTimeoutSeconds);
-                });
+            options.UseSqlite(
+                configuration.GetConnectionString("DefaultConnection"));
 
             if (databaseOptions.EnableSensitiveDataLogging)
             {
                 options.EnableSensitiveDataLogging();
             }
-        });
-
-        // Adicionar também o TodoDbContext para compatibilidade
-        services.AddDbContext<TodoDbContext>(options =>
-        {
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection") ?? databaseOptions.DefaultConnection);
         });
 
         return services;

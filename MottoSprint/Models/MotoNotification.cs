@@ -237,78 +237,7 @@ public class Cliente
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
-/// <summary>
-/// Modelo para motos
-/// </summary>
-[Table("TB_MOTO")]
-public class Moto
-{
-    [Key]
-    [StringLength(10)]
-    [Column("PLACA")]
-    public string Placa { get; set; } = string.Empty;
 
-    [Required]
-    [Column("CLIENTE_ID")]
-    public Guid ClienteId { get; set; }
-
-    [StringLength(100)]
-    [Column("MODELO")]
-    public string? Modelo { get; set; }
-
-    [StringLength(50)]
-    [Column("COR")]
-    public string? Cor { get; set; }
-
-    [Column("ANO")]
-    public int? Ano { get; set; }
-
-    [Column("ATIVA")]
-    public bool Ativa { get; set; } = true;
-
-    [Column("CREATED_AT")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [Column("UPDATED_AT")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    // Navigation property
-    [ForeignKey("ClienteId")]
-    public virtual Cliente? Cliente { get; set; }
-}
-
-/// <summary>
-/// Modelo para vagas
-/// </summary>
-[Table("TB_VAGA")]
-public class Vaga
-{
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
-    [Required]
-    [StringLength(10)]
-    [Column("NUMERO")]
-    public string Numero { get; set; } = string.Empty;
-
-    [Required]
-    [StringLength(10)]
-    [Column("LINHA")]
-    public string Linha { get; set; } = string.Empty;
-
-    [Column("OCUPADA")]
-    public bool Ocupada { get; set; } = false;
-
-    [Column("ATIVA")]
-    public bool Ativa { get; set; } = true;
-
-    [Column("CREATED_AT")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [Column("UPDATED_AT")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-}
 
 /// <summary>
 /// Modelo para estatísticas de estacionamento

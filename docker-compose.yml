@@ -18,6 +18,23 @@ services:
 
 
 
+  # Oracle Database para MottoSprint
+  oracle:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: ${DOCKER_CONTAINER_PREFIX}_oracle
+    environment:
+      ORACLE_PWD: ${ORACLE_PASSWORD:-Oracle123}
+      ORACLE_CHARACTERSET: AL32UTF8
+    ports:
+      - "${ORACLE_PORT:-1521}:1521"
+      - "5500:5500"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./Database:/docker-entrypoint-initdb.d/startup
+    networks:
+      - ${DOCKER_NETWORK}
+    shm_size: 1g
+
   # Redis para Notification Service
   redis:
     image: redis:7.2-alpine
@@ -52,7 +69,7 @@ services:
     container_name: ${DOCKER_CONTAINER_PREFIX}_mottosprint
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DATABASE};Username=${POSTGRES_USERNAME};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__OracleConnection=Data Source=oracle:1521/XE;User Id=MOTTOSPRINT;Password=${ORACLE_USER_PASSWORD:-password123};
       - ConnectionStrings__Redis=redis:${REDIS_PORT}
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=${RABBITMQ_USERNAME}
@@ -65,7 +82,7 @@ services:
     ports:
       - "${MOTTOSPRINT_PORT:-5000}:80"
     depends_on:
-      - postgres
+      - oracle
       - redis
       - rabbitmq
     networks:
@@ -75,6 +92,7 @@ services:
 
 volumes:
   postgres_data:
+  oracle_data:
   redis_data:
   rabbitmq_data:
 

@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using MottoSprint.Data;
 using MottoSprint.Interfaces;
 using MottoSprint.Models;
+using MottoSprint.DTOs;
+using MottoSprint.Extensions;
 
 namespace MottoSprint.Services;
 
@@ -12,15 +14,18 @@ public class MotoNotificationService : IMotoNotificationService
 {
     private readonly MottoSprintDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly IMotoNotificationIntegratedService _motoNotificationIntegratedService;
     private readonly ILogger<MotoNotificationService> _logger;
 
     public MotoNotificationService(
         MottoSprintDbContext context,
         INotificationService notificationService,
+        IMotoNotificationIntegratedService motoNotificationIntegratedService,
         ILogger<MotoNotificationService> logger)
     {
         _context = context;
         _notificationService = notificationService;
+        _motoNotificationIntegratedService = motoNotificationIntegratedService;
         _logger = logger;
     }
 
@@ -83,6 +88,10 @@ public class MotoNotificationService : IMotoNotificationService
             _context.MotoNotifications.Add(notificacao);
             _context.LogsMovimentacao.Add(log);
             await _context.SaveChangesAsync();
+
+            // Criar notificação persistente no banco Oracle
+            await _motoNotificationIntegratedService.CreateMotoEntradaNotificationAsync(entrada.MotoPlaca, entrada.VagaId.GetHashCode());
+            await _motoNotificationIntegratedService.CreateVagaOcupadaNotificationAsync(entrada.VagaId.GetHashCode(), entrada.MotoPlaca);
 
             // Enviar notificação via SignalR se configurado
             var configuracao = await ObterConfiguracaoNotificacaoAsync(entrada.ClienteId);
@@ -166,6 +175,10 @@ public class MotoNotificationService : IMotoNotificationService
             _context.MotoNotifications.Add(notificacao);
             _context.LogsMovimentacao.Add(log);
             await _context.SaveChangesAsync();
+
+            // Criar notificação persistente no banco Oracle
+            await _motoNotificationIntegratedService.CreateMotoSaidaNotificationAsync(saida.MotoPlaca, saida.VagaId.GetHashCode());
+            await _motoNotificationIntegratedService.CreateVagaLiberadaNotificationAsync(saida.VagaId.GetHashCode(), saida.MotoPlaca);
 
             // Enviar notificação via SignalR se configurado
             var configuracao = await ObterConfiguracaoNotificacaoAsync(saida.ClienteId);
@@ -301,12 +314,12 @@ public class MotoNotificationService : IMotoNotificationService
         return vaga != null && vaga.Ativa && !vaga.Ocupada;
     }
 
-    public async Task<Vaga?> ObterVagaAsync(Guid vagaId)
+    public async Task<VagaDb?> ObterVagaAsync(Guid vagaId)
     {
         return await _context.Vagas.FindAsync(vagaId);
     }
 
-    public async Task<Moto?> ObterMotoAsync(string placa)
+    public async Task<MotoDb?> ObterMotoAsync(string placa)
     {
         return await _context.Motos
             .Include(m => m.Cliente)
@@ -316,5 +329,131 @@ public class MotoNotificationService : IMotoNotificationService
     public async Task<Cliente?> ObterClienteAsync(Guid clienteId)
     {
         return await _context.Clientes.FindAsync(clienteId);
+    }
+
+    public async Task<MotoNotification?> ObterNotificacaoPorIdAsync(Guid id)
+    {
+        return await _context.MotoNotifications
+            .FirstOrDefaultAsync(n => n.Id == id);
+    }
+
+    public async Task<List<LogMovimentacao>> ObterLogsPorMotoAsync(string placa, DateTime? dataInicio = null, DateTime? dataFim = null)
+    {
+        var query = _context.LogsMovimentacao
+            .Where(l => l.MotoPlaca == placa);
+
+        if (dataInicio.HasValue)
+            query = query.Where(l => l.TimestampEvento >= dataInicio.Value);
+
+        if (dataFim.HasValue)
+            query = query.Where(l => l.TimestampEvento <= dataFim.Value);
+
+        return await query
+            .OrderByDescending(l => l.TimestampEvento)
+            .ToListAsync();
+    }
+
+    public async Task<PagedResultDto<LogMovimentacaoDto>> ObterLogsMovimentacaoPaginadoAsync(
+        int pageNumber = 1, 
+        int pageSize = 10, 
+        DateTime? dataInicio = null, 
+        DateTime? dataFim = null)
+    {
+        var query = _context.LogsMovimentacao.AsQueryable();
+
+        if (dataInicio.HasValue)
+            query = query.Where(l => l.TimestampEvento >= dataInicio.Value);
+
+        if (dataFim.HasValue)
+            query = query.Where(l => l.TimestampEvento <= dataFim.Value);
+
+        var totalCount = await query.CountAsync();
+        
+        var logs = await query
+            .OrderByDescending(l => l.TimestampEvento)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => new LogMovimentacaoDto
+            {
+                Id = l.Id,
+                MotoPlaca = l.MotoPlaca,
+                VagaId = l.VagaId,
+                TipoMovimentacao = l.TipoMovimentacao,
+                TimestampEvento = l.TimestampEvento,
+                ClienteId = l.ClienteId,
+                Detalhes = l.Detalhes ?? string.Empty
+            })
+            .ToListAsync();
+
+        return logs.ToPaginatedResult(pageNumber, pageSize);
+    }
+
+    public async Task<PagedResultDto<LogMovimentacaoDto>> ObterLogsPorMotoPaginadoAsync(
+        string placa, 
+        int pageNumber = 1, 
+        int pageSize = 10, 
+        DateTime? dataInicio = null, 
+        DateTime? dataFim = null)
+    {
+        var query = _context.LogsMovimentacao
+            .Where(l => l.MotoPlaca == placa);
+
+        if (dataInicio.HasValue)
+            query = query.Where(l => l.TimestampEvento >= dataInicio.Value);
+
+        if (dataFim.HasValue)
+            query = query.Where(l => l.TimestampEvento <= dataFim.Value);
+
+        var totalCount = await query.CountAsync();
+        
+        var logs = await query
+            .OrderByDescending(l => l.TimestampEvento)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => new LogMovimentacaoDto
+            {
+                Id = l.Id,
+                MotoPlaca = l.MotoPlaca,
+                VagaId = l.VagaId,
+                TipoMovimentacao = l.TipoMovimentacao,
+                TimestampEvento = l.TimestampEvento,
+                ClienteId = l.ClienteId,
+                Detalhes = l.Detalhes ?? string.Empty
+            })
+            .ToListAsync();
+
+        return logs.ToPaginatedResult(pageNumber, pageSize);
+    }
+
+    public async Task<PagedResultDto<MotoNotificationDto>> ObterNotificacoesPorClientePaginadoAsync(
+        Guid clienteId, 
+        int pageNumber = 1, 
+        int pageSize = 10)
+    {
+        var query = _context.MotoNotifications
+            .Where(n => n.ClienteId == clienteId);
+
+        var totalCount = await query.CountAsync();
+        
+        var notifications = await query
+            .OrderByDescending(n => n.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(n => new MotoNotificationDto
+            {
+                Id = n.Id,
+                ClienteId = n.ClienteId,
+                MotoPlaca = n.MotoPlaca,
+                VagaId = n.VagaId,
+                TipoMovimentacao = n.TipoMovimentacao,
+                TimestampEvento = n.TimestampEvento,
+                Mensagem = n.Mensagem,
+                Lida = n.Lida,
+                CreatedAt = n.CreatedAt,
+                UpdatedAt = n.UpdatedAt
+            })
+            .ToListAsync();
+
+        return notifications.ToPaginatedResult(pageNumber, pageSize);
     }
 }

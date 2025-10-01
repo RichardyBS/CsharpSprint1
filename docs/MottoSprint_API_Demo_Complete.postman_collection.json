@@ -1,0 +1,524 @@
+{
+  "info": {
+    "name": "MottoSprint API - Demonstração Completa",
+    "description": "Coleção completa para demonstração da API MottoSprint - Desde Java API até Notificações .NET",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string",
+      "description": "URL base da API .NET MottoSprint"
+    },
+    {
+      "key": "javaApiUrl",
+      "value": "http://52.226.54.155:8080/api",
+      "type": "string",
+      "description": "URL base da API Java"
+    },
+    {
+      "key": "motoPlaca",
+      "value": "ABC1234",
+      "type": "string",
+      "description": "Placa da moto para testes"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string",
+      "description": "ID da notificação criada"
+    }
+  ],
+  "item": [
+    {
+      "name": "🚀 1. SETUP - Verificações Iniciais",
+      "item": [
+        {
+          "name": "1.1 Health Check - API .NET",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/swagger/index.html",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger", "index.html"]
+            },
+            "description": "Verifica se a API .NET está rodando e acessível via Swagger"
+          }
+        },
+        {
+          "name": "1.2 Test Java API Connection",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{javaApiUrl}}/vagas",
+              "host": ["{{javaApiUrl}}"],
+              "path": ["vagas"]
+            },
+            "description": "Testa conectividade com a API Java (esperado: 405 Method Not Allowed - confirma que está respondendo)"
+          }
+        }
+      ],
+      "description": "Verificações iniciais para confirmar que ambas as APIs estão funcionando"
+    },
+    {
+      "name": "🏍️ 2. CRUD DE MOTOS",
+      "item": [
+        {
+          "name": "2.1 Listar Todas as Motos (Inicial - Vazio)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos"]
+            },
+            "description": "Lista todas as motos cadastradas. Inicialmente deve retornar vazio."
+          }
+        },
+        {
+          "name": "2.2 Criar Nova Moto (Demonstração)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Verifica se a moto foi criada com sucesso",
+                  "pm.test('Moto criada com sucesso', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Verifica se HATEOAS está presente",
+                  "pm.test('HATEOAS links presentes', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('_links');",
+                  "    pm.expect(response._links).to.have.property('self');",
+                  "    pm.expect(response._links).to.have.property('update');",
+                  "    pm.expect(response._links).to.have.property('delete');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"{{motoPlaca}}\",\n  \"modelo\": \"Honda CB600F Hornet\",\n  \"ano\": 2023,\n  \"cor\": \"Azul Metálico\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/motos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos"]
+            },
+            "description": "Cria uma nova moto com validação completa. Demonstra:\n- Validação de campos obrigatórios\n- Retorno com HATEOAS\n- Status HTTP correto (201 Created)"
+          }
+        },
+        {
+          "name": "2.3 Buscar Moto por Placa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Moto encontrada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.placa).to.eql(pm.variables.get('motoPlaca'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/{{motoPlaca}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "{{motoPlaca}}"]
+            },
+            "description": "Busca uma moto específica por placa. Demonstra:\n- Busca por ID (placa)\n- Retorno com dados completos\n- Links HATEOAS contextuais"
+          }
+        },
+        {
+          "name": "2.4 Listar Todas as Motos (Após Criação)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos"]
+            },
+            "description": "Lista todas as motos novamente para mostrar que a moto foi criada."
+          }
+        }
+      ],
+      "description": "Operações CRUD básicas para motos"
+    },
+    {
+      "name": "🔄 3. INTEGRAÇÃO COM JAVA API",
+      "item": [
+        {
+          "name": "3.1 Mover Moto para Vaga (Comunicação .NET → Java)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Moto movida com sucesso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Links HATEOAS atualizados', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response._links).to.have.property('retirar-vaga');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"{{motoPlaca}}\",\n  \"linha\": \"A\",\n  \"coluna\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/moverVaga",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "moverVaga"]
+            },
+            "description": "DEMONSTRAÇÃO PRINCIPAL: Comunicação entre .NET e Java API\n\nEste endpoint:\n1. Recebe dados da moto no .NET\n2. Comunica com a API Java para alocar vaga\n3. Atualiza o status da moto\n4. Retorna links HATEOAS atualizados\n\nEvidencia a integração completa entre as duas APIs!"
+          }
+        },
+        {
+          "name": "3.2 Verificar Status da Moto (Após Mover)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/{{motoPlaca}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "{{motoPlaca}}"]
+            },
+            "description": "Verifica o status da moto após ser movida para uma vaga. Deve mostrar:\n- idVaga preenchido\n- Links HATEOAS diferentes (retirar-vaga em vez de mover-vaga)"
+          }
+        },
+        {
+          "name": "3.3 Retirar Moto da Vaga",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/retirarVaga/{{motoPlaca}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "retirarVaga", "{{motoPlaca}}"]
+            },
+            "description": "Remove a moto da vaga, liberando-a para outras motos. Demonstra:\n- Comunicação reversa com Java API\n- Atualização de status\n- Links HATEOAS dinâmicos"
+          }
+        }
+      ],
+      "description": "Demonstração da integração entre .NET e Java API"
+    },
+    {
+      "name": "📢 4. SISTEMA DE NOTIFICAÇÕES",
+      "item": [
+        {
+          "name": "4.1 Listar Notificações (Inicial)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Lista todas as notificações existentes no sistema."
+          }
+        },
+        {
+          "name": "4.2 Criar Notificação de Entrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Notificação criada', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Salva o ID da notificação para uso posterior",
+                  "if (pm.response.code === 201) {",
+                  "    const notificationId = pm.response.text();",
+                  "    pm.collectionVariables.set('notificationId', notificationId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motoPlaca\": \"{{motoPlaca}}\",\n  \"tipoMovimentacao\": \"ENTRADA\",\n  \"timestampEvento\": \"{{$isoTimestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Cria uma notificação de entrada de moto. Demonstra:\n- Sistema de notificações funcionando\n- Timestamp automático\n- Integração com SignalR (tempo real)"
+          }
+        },
+        {
+          "name": "4.3 Criar Notificação de Saída",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motoPlaca\": \"{{motoPlaca}}\",\n  \"tipoMovimentacao\": \"SAIDA\",\n  \"timestampEvento\": \"{{$isoTimestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Cria uma notificação de saída de moto."
+          }
+        },
+        {
+          "name": "4.4 Listar Notificações (Final)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Lista todas as notificações após criação para mostrar o histórico."
+          }
+        }
+      ],
+      "description": "Sistema completo de notificações em tempo real"
+    },
+    {
+      "name": "🧪 5. TESTES DE VALIDAÇÃO",
+      "item": [
+        {
+          "name": "5.1 Teste Validação - Moto sem Cor (Erro Esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Validação funcionando - Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Mensagem de erro presente', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('errors');",
+                  "    pm.expect(response.errors).to.have.property('Cor');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"XYZ9999\",\n  \"modelo\": \"Yamaha MT-07\",\n  \"ano\": 2023\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/motos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos"]
+            },
+            "description": "Teste de validação: tenta criar moto sem cor obrigatória.\nDeve retornar 400 Bad Request com mensagem de erro específica."
+          }
+        },
+        {
+          "name": "5.2 Teste Busca - Moto Inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Moto não encontrada - 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/INEXISTENTE999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "INEXISTENTE999"]
+            },
+            "description": "Teste de busca por moto inexistente. Deve retornar 404 Not Found."
+          }
+        }
+      ],
+      "description": "Testes de validação e tratamento de erros"
+    },
+    {
+      "name": "🧹 6. LIMPEZA (OPCIONAL)",
+      "item": [
+        {
+          "name": "6.1 Deletar Moto de Teste",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/motos/{{motoPlaca}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "motos", "{{motoPlaca}}"]
+            },
+            "description": "Remove a moto de teste criada durante a demonstração."
+          }
+        }
+      ],
+      "description": "Limpeza dos dados de teste (opcional)"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script executado antes de cada request",
+          "console.log('🚀 Executando request para: ' + pm.request.name);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script executado após cada request",
+          "console.log('✅ Request concluído: ' + pm.request.name);",
+          "console.log('📊 Status: ' + pm.response.status + ' ' + pm.response.code);"
+        ]
+      }
+    }
+  ]
+}

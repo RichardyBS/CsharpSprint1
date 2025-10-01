@@ -43,6 +43,14 @@ Antes de executar o projeto, certifique-se de ter instalado:
 
 ## 🚀 Como Executar o Projeto
 
+### ⚠️ Configuração Inicial (IMPORTANTE)
+
+1. **Configure as variáveis de ambiente:**
+   ```bash
+   cp .env.example .env
+   # Edite o arquivo .env com suas configurações
+   ```
+
 ### Opção 1: Execução Local (Recomendada)
 
 1. **Clone o repositório:**
@@ -135,6 +143,13 @@ Para facilitar os testes da API, criamos guias detalhados:
 
 - **[TestesAPI.md](./TestesAPI.md)** - Guia completo com passo a passo para testar via Swagger UI
 - **[ExemplosCURL.md](./ExemplosCURL.md)** - Exemplos de testes via linha de comando (cURL)
+
+### 🔐 Segurança
+
+Para informações sobre configurações seguras e uso em produção:
+
+- **[SECURITY.md](./SECURITY.md)** - Guia de configurações de segurança
+- **[.env.example](./.env.example)** - Exemplo de configurações de ambiente
 
 ### Endpoints Principais
 

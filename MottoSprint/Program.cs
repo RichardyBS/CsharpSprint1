@@ -83,8 +83,8 @@ builder.Services.AddSwaggerGen(c =>
         Contact = new OpenApiContact
         {
             Name = "Equipe MottoSprint - Challenge FIAP 2025",
-            Email = "contato@mottosprint.com",
-            Url = new Uri("https://github.com/mottosprint/api")
+            Email = "contato@exemplo.com",
+            Url = new Uri("https://github.com/seu-usuario/mottosprint")
         },
         License = new OpenApiLicense
         {
@@ -195,8 +195,8 @@ fetch('http://localhost:5003/api/notification', {
 
     c.AddServer(new OpenApiServer
     {
-        Url = "https://mottosprint-api.azurewebsites.net",
-        Description = "Servidor de Produção (Azure)"
+        Url = "https://your-production-url.com",
+        Description = "Servidor de Produção"
     });
 });
 

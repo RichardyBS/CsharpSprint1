@@ -27,6 +27,17 @@ docker-compose.override.yml
 .env
 .env.local
 .env.production
+.env.development
+
+# Sensitive configuration files
+appsettings.Production.json
+secrets.json
+*.secrets.json
+
+# Personal information
+**/bin/
+**/obj/
+**/.vs/
 
 # IDE
 .vscode/

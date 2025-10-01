@@ -34,7 +34,7 @@ public class JavaApiService : IJavaApiService
     {
         _httpClient = httpClient;
         _logger = logger;
-        _baseUrl = "http://52.226.54.155:8080/api";
+        _baseUrl = "http://your-java-api-url:8080/api";
         
         _httpClient.BaseAddress = new Uri(_baseUrl);
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
